@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no">
+    <title>上海地区二手房价格预估</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.8.0/echarts.common.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='reset.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" type="text/css"/>
+    <style type="text/css">
+    </style>
+</head>
+<body class="b_bg">
+<div class="b_box">
+    <h1 class="b_title">上海地区二手房价格预估及推荐</h1>
+    <div class="tabs clear">
+        <div class="tabs_con">
+            <div class="selects">
+                <div class="sel_list">
+                    <div class="sel_list_title">区县（必选）</div>
+                    <select class="select_style" id="district_select">
+                        <option value="">无</option>
+                    </select>
+                </div>
+                <div class="sel_list">
+                    <div class="sel_list_title">镇/街道</div>
+                    <select class="select_style" id="street_select">
+                        <option value="">无</option>
+                    </select>
+                </div>
+                <div class="sel_list">
+                    <div class="sel_list_title">小区</div>
+                    <select class="select_style" id="block_select">
+                        <option value="">无</option>
+                    </select>
+                </div>
+                <div class="sel_list">
+                    <div class="sel_list_title">户型</div>
+                    <select class="select_style" id="house_type_select">
+                        <option value="">无</option>
+                    </select>
+                </div>
+                <div class="sel_list">
+                    <div class="sel_list_title">面积</div>
+                    <input type="number" class="text_style" id="area_select">
+                </div>
+                <div class="sel_list">
+                    <div class="sel_list_title">楼层</div>
+                    <select class="select_style" id="floor_select">
+                        <option value="">无</option>
+                    </select>
+                </div>
+                <div class="sel_list">
+                    <div class="sel_list_title">建成时间（年份）</div>
+                    <input type="number" class="text_style" id="built_select">
+                </div>
+                <div class="b_btn" id="estimate_btn">预估</div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="p_info">
+            预估价格：<span class="bfont" id="estimate_price">-</span> 万元
+        </div>
+        <div class="p_info chart_tool_info" style="display: none;">
+            与该房相似的房子：
+        </div>
+        <div class="reports_box" id="reports_box" style="width: 600px;height:400px;margin:0 auto;">
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+
+    $(function () {
+
+        $('#estimate_btn').on("click", function () {
+            $.ajax({
+                url: '/estimate',
+                type: 'GET',
+                data: {
+                    'district_val': $('#district_select').val(),
+                    'street_val': $('#street_select').val(),
+                    'block_val': $('#block_select').val(),
+                    'house_type_val': $('#house_type_select').val(),
+                    'floor_val': $('#floor_select').val(),
+                    'built_val': $('#built_select').val(),
+                    'area_val': $('#area_select').val(),
+                },
+                dataType: 'json',
+                success: function (res) {
+
+                    $('#estimate_price').html(res.estimate_price);  // 预估价格
+                    $('.chart_tool_info').show(); // 图表提示信息
+
+                    var report = echarts.init(document.getElementById('reports_box'));
+
+                    var option = {
+                        tooltip: {
+                            trigger: 'axis',
+                            axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                                type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                            },
+                            formatter: function (tipData) {
+                                var cur_tooltip =res.tooltip[tipData[0].name];
+                                return '小区名称：' + cur_tooltip.community_name + '<br>价格：'+ tipData[0].value + '万元<br>' +
+                                    '房间数：' + cur_tooltip.room_num + '间<br>面积:' + cur_tooltip.area + '平方米<br>区域:' + cur_tooltip.district +
+                                     '<br>楼层:' + cur_tooltip.floor + '层<br>建成年份：' + cur_tooltip.built_year + '年';}
+                        },
+                        legend: {
+                            data: res.legend,
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis: [
+                            {
+                                type: 'category',
+                                data: res.x_data,
+                                axisLabel: {
+                                    textStyle: {
+                                        color: '#2ea9ce'
+                                    }
+                                },
+                                axisLine: {
+                                    lineStyle: {
+                                        color: '#2ea9ce',
+                                    }
+                                },
+                            }
+                        ],
+                        yAxis: [
+                            {
+                                type: 'value',
+                                axisLabel: {
+                                    textStyle: {
+                                        color: '#2ea9ce'
+                                    }
+                                },
+                                axisLine: {
+                                    lineStyle: {
+                                        color: '#2ea9ce',
+                                    }
+                                },
+                            }
+                        ],
+                        series: res.series,
+                    };
+
+                    report.setOption(option);
+
+                }
+            });
+        });
+
+        var district_dict = {
+            'huangpu': [
+                {'val': '人民广场', 'title': '人民广场'},
+                {'val': '老西门', 'title': '老西门'},
+                {'val': '南京东路', 'title': '南京东路'},
+                {'val': '打浦桥', 'title': '打浦桥'},
+                {'val': '五里桥', 'title': '五里桥'},
+                {'val': '豫园', 'title': '豫园'},
+                {'val': '黄埔滨江', 'title': '黄埔滨江'},
+            ],
+            'jingan': [
+                {'val': '曹家渡', 'title': '曹家渡'},
+                {'val': '江宁路', 'title': '江宁路'},
+                {'val': '南京西路', 'title': '南京西路'},
+                {'val': '静安寺', 'title': '静安寺'},
+            ],
+            'putuo': [
+                {'val': '武宁', 'title': '武宁'},
+                {'val': '光新', 'title': '光新'},
+                {'val': '长征', 'title': '长征'},
+                {'val': '中远两湾城', 'title': '中远两湾城'},
+                {'val': '万里', 'title': '万里'},
+                {'val': '桃浦', 'title': '桃浦'},
+                {'val': '长寿路', 'title': '长寿路'},
+                {'val': '曹杨', 'title': '曹杨'}
+            ]
+
+        };
+
+        //地区
+        $("#district_select").on("change", function () {
+
+            //小区
+            $('#block_select').find('option').remove();
+            $('#block_select')[0].options.add(new Option('无', ''));
+
+            //街道
+            var district_val = $(this).val();
+            var street_list = district_dict[district_val];
+
+            $('#street_select').find('option').remove();
+            $('#street_select')[0].options.add(new Option('无', ''));
+
+            if (street_list) {
+                for (var i = 0; i < street_list.length; i++) {
+                    $('#street_select')[0].options.add(new Option(street_list[i].title, street_list[i].val));
+                }
+            }
+
+        });
+
+        //街道
+        $("#street_select").on("change", function () {
+            var street_val = $(this).val();
+
+            $('#block_select').find('option').remove();
+            $('#block_select')[0].options.add(new Option('无', ''));
+
+            if (street_val) {
+                $.ajax({
+                    url: '/blocks',
+                    type: 'GET',
+                    data: {
+                        'street_val': street_val,
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        for (var i = 0; i < data.length; i++) {
+                            $('#block_select')[0].options.add(new Option(data[i].title, data[i].val)); //这个兼容IE与firefox
+                        }
+                    }
+                });
+            }
+
+        });
+
+
+        //区
+        var district_list = [
+            {'val': 'huangpu', 'title': '黄浦'},
+            {'val': 'baoshan', 'title': '宝山'},
+            {'val': 'minhang', 'title': '闵行'},
+            {'val': 'xuhui', 'title': '徐汇'},
+            {'val': 'putuo', 'title': '普陀'},
+            {'val': 'yangpu', 'title': '杨浦'},
+            {'val': 'changning', 'title': '长宁'},
+            {'val': 'sonjiang', 'title': '松江'},
+            {'val': 'jiading', 'title': '嘉定'},
+            {'val': 'zhabei', 'title': '闸北'},
+            {'val': 'qingpu', 'title': '青浦'},
+            {'val': 'fengxian', 'title': '奉贤'},
+            {'val': 'jinshan', 'title': '金山'},
+            {'val': 'chongming', 'title': '崇明'},
+        ];
+        for (var i = 0; i < district_list.length; i++) {
+            $('#district_select')[0].options.add(new Option(district_list[i].title, district_list[i].val)); //这个兼容IE与firefox
+        }
+
+
+        //户型
+        var house_type = [
+            {'val': '1-0', 'title': '1室0厅'},
+            {'val': '1-1', 'title': '1室1厅'},
+            {'val': '2-0', 'title': '2室0厅'},
+            {'val': '2-1', 'title': '2室1厅'},
+            {'val': '3-1', 'title': '3室1厅'},
+            {'val': '3-2', 'title': '3室2厅'},
+            {'val': '4-2', 'title': '4室2厅'},
+        ];
+        for (var i = 0; i < house_type.length; i++) {
+            $('#house_type_select')[0].options.add(new Option(house_type[i].title, house_type[i].val)); //这个兼容IE与firefox
+        }
+
+
+        // 楼层
+        for (var i = 0; i <= 40; i++) {
+            $('#floor_select')[0].options.add(new Option(i, i)); //这个兼容IE与firefox
+        }
+
+    })
+</script>
+</html>
