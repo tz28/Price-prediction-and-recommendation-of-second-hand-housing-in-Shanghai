@@ -21,5 +21,9 @@ crawler.py 为爬虫代码
 
 preprocess.py 为预处理代码
 
-lianjia1.txt为爬取的原始数据，共42084条，数据样例为：
+lianjia_data1.txt 为爬取的原始数据，共42084条，数据样例为：
+
+![数据展示](data_example.jpg)
+
+lianjia_data2.csv 内容和lianjia_data1.txt一样，为csv版本
 
