@@ -62,7 +62,7 @@ SELECT * FROM madlib.knn(
                 );
 ```
 
-
+关于在centos7中安装配置postgreSQL和MadLib，请参见本人博客：https://blog.csdn.net/u012328159/article/details/79206822
 
 
 
