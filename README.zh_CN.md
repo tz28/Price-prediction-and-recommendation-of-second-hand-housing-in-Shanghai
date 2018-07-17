@@ -9,6 +9,8 @@ Price prediction and recommendation of second-hand housing in Shanghai（上海�
 
 2、本系统主要功能：爬取链家上海地区二手房信息，使用postgresql的机器学习库MADlib，采用KNN算法对用户输入的需求信息预测房价及推荐五个相似房源。
 
+3、开发环境：centos7 64位、PostgreSQL9.5、MadLib1.13、pgAdmin4.2、Python2.7（web部分）、python3.6（数据爬取及处理部分）
+
 **本系统web显示界面在好友蒋雯协助下完成，其他工作由我完成。**
 
 ----
