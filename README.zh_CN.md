@@ -27,3 +27,45 @@ lianjia_data1.txt 为爬取的原始数据，共42084条，数据样例为：
 
 lianjia_data2.csv 内容和lianjia_data1.txt一样，为csv版本
 
+district_encode_dict.txt 为地区的数字编码，这个文件我自己处理得到的，并不是爬下来的，这个可以自己处理
+
+name_encode_dict.txt 为小区的数字编码，这个文件我自己处理得到的，并不是爬下来的，这个可以自己处理
+
+tree_data.txt 为存进postgresql里的数据（格式符合MADlib要求）
+
+----
+
+**sh_house_data：**
+
+该部分为web部分，主要操作在文件sh_house_data/app/views.py里
+
+----
+
+**Postgresql中MADlib机器学习库KNN模型使用语句为：**
+
+```SQL
+DROP TABLE IF EXISTS knn_result_regression;
+SELECT * FROM madlib.knn(
+                'out_train',
+                'features',
+                'id',
+                'label',
+                'out_test',
+                'features',
+                'id',
+                'knn_result_regression',
+                 5, 
+                True,
+                'madlib.dist_norm2'
+                );
+```
+
+
+
+
+
+
+
+
+
+
